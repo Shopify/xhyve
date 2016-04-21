@@ -305,7 +305,7 @@ static int
 vcpu_delete(int vcpu)
 {
 	if (!CPU_ISSET(((unsigned) vcpu), &cpumask)) {
-		fprintf(stderr, "Attempting to delete unknown cpu %d\n", vcpu);
+		fprintf(stderr, "Attempting to delete unknown cpu %d\r\n", vcpu);
 		exit(1);
 	}
 
@@ -343,7 +343,7 @@ vmexit_inout(struct vm_exit *vme, int *pvcpu)
 
 	error = emulate_inout(vcpu, vme, strictio);
 	if (error) {
-		fprintf(stderr, "Unhandled %s%c 0x%04x at 0x%llx\n",
+		fprintf(stderr, "Unhandled %s%c 0x%04x at 0x%llx\r\n",
 			in ? "in" : "out",
 			bytes == 1 ? 'b' : (bytes == 2 ? 'w' : 'l'),
 			port, vmexit->rip);
@@ -363,7 +363,7 @@ vmexit_rdmsr(struct vm_exit *vme, int *pvcpu)
 	val = 0;
 	error = emulate_rdmsr(*pvcpu, vme->u.msr.code, &val);
 	if (error != 0) {
-		fprintf(stderr, "rdmsr to register %#x on vcpu %d\n",
+		fprintf(stderr, "rdmsr to register %#x on vcpu %d\r\n",
 		    vme->u.msr.code, *pvcpu);
 		if (strictmsr) {
 			vm_inject_gp(*pvcpu);
@@ -389,7 +389,7 @@ vmexit_wrmsr(struct vm_exit *vme, int *pvcpu)
 
 	error = emulate_wrmsr(*pvcpu, vme->u.msr.code, vme->u.msr.wval);
 	if (error != 0) {
-		fprintf(stderr, "wrmsr to register %#x(%#llx) on vcpu %d\n",
+		fprintf(stderr, "wrmsr to register %#x(%#llx) on vcpu %d\r\n",
 		    vme->u.msr.code, vme->u.msr.wval, *pvcpu);
 		if (strictmsr) {
 			vm_inject_gp(*pvcpu);
@@ -413,16 +413,16 @@ vmexit_spinup_ap(struct vm_exit *vme, int *pvcpu)
 static int
 vmexit_vmx(struct vm_exit *vme, int *pvcpu)
 {
-	fprintf(stderr, "vm exit[%d]\n", *pvcpu);
-	fprintf(stderr, "\treason\t\tVMX\n");
-	fprintf(stderr, "\trip\t\t0x%016llx\n", vme->rip);
-	fprintf(stderr, "\tinst_length\t%d\n", vme->inst_length);
-	fprintf(stderr, "\tstatus\t\t%d\n", vme->u.vmx.status);
-	fprintf(stderr, "\texit_reason\t%u\n", vme->u.vmx.exit_reason);
-	fprintf(stderr, "\tqualification\t0x%016llx\n",
+	fprintf(stderr, "vm exit[%d]\r\n", *pvcpu);
+	fprintf(stderr, "\treason\t\tVMX\r\n");
+	fprintf(stderr, "\trip\t\t0x%016llx\r\n", vme->rip);
+	fprintf(stderr, "\tinst_length\t%d\r\n", vme->inst_length);
+	fprintf(stderr, "\tstatus\t\t%d\r\n", vme->u.vmx.status);
+	fprintf(stderr, "\texit_reason\t%u\r\n", vme->u.vmx.exit_reason);
+	fprintf(stderr, "\tqualification\t0x%016llx\r\n",
 	    vme->u.vmx.exit_qualification);
-	fprintf(stderr, "\tinst_type\t\t%d\n", vme->u.vmx.inst_type);
-	fprintf(stderr, "\tinst_error\t\t%d\n", vme->u.vmx.inst_error);
+	fprintf(stderr, "\tinst_type\t\t%d\r\n", vme->u.vmx.inst_type);
+	fprintf(stderr, "\tinst_error\t\t%d\r\n", vme->u.vmx.inst_error);
 	return (VMEXIT_ABORT);
 }
 
@@ -481,7 +481,7 @@ vmexit_inst_emul(struct vm_exit *vme, int *pvcpu)
 
 	if (err) {
 		if (err == ESRCH) {
-			fprintf(stderr, "Unhandled memory access to 0x%llx\n",
+			fprintf(stderr, "Unhandled memory access to 0x%llx\r\n",
 			    vme->u.inst_emul.gpa);
 		}
 
@@ -490,7 +490,7 @@ vmexit_inst_emul(struct vm_exit *vme, int *pvcpu)
 			fprintf(stderr, "0x%02x%s", vie->inst[i],
 			    i != (vie->num_valid - 1) ? " " : "");
 		}
-		fprintf(stderr, "] at 0x%llx\n", vme->rip);
+		fprintf(stderr, "] at 0x%llx\r\n", vme->rip);
 		return (VMEXIT_ABORT);
 	}
 
@@ -532,7 +532,7 @@ vmexit_suspend(struct vm_exit *vme, int *pvcpu)
 	case VM_SUSPEND_TRIPLEFAULT:
 		exit(3);
 	default:
-		fprintf(stderr, "vmexit_suspend: invalid reason %d\n", how);
+		fprintf(stderr, "vmexit_suspend: invalid reason %d\r\n", how);
 		exit(100);
 	}
 }
@@ -559,7 +559,7 @@ vcpu_set_capabilities(int cpu)
 	if (fbsdrun_vmexit_on_hlt()) {
 		err = xh_vm_get_capability(cpu, VM_CAP_HALT_EXIT, &tmp);
 		if (err < 0) {
-			fprintf(stderr, "VM exit on HLT not supported\n");
+			fprintf(stderr, "VM exit on HLT not supported\r\n");
 			exit(1);
 		}
 		xh_vm_set_capability(cpu, VM_CAP_HALT_EXIT, 1);
@@ -574,7 +574,7 @@ vcpu_set_capabilities(int cpu)
 		err = xh_vm_get_capability(cpu, VM_CAP_PAUSE_EXIT, &tmp);
 		if (err < 0) {
 			fprintf(stderr,
-			    "SMP mux requested, no pause support\n");
+			    "SMP mux requested, no pause support\r\n");
 			exit(1);
 		}
 		xh_vm_set_capability(cpu, VM_CAP_PAUSE_EXIT, 1);
@@ -588,7 +588,7 @@ vcpu_set_capabilities(int cpu)
 		err = xh_vm_set_x2apic_state(cpu, X2APIC_DISABLED);
 
 	if (err) {
-		fprintf(stderr, "Unable to set x2apic state (%d)\n", err);
+		fprintf(stderr, "Unable to set x2apic state (%d)\r\n", err);
 		exit(1);
 	}
 }
@@ -615,7 +615,7 @@ vcpu_loop(int vcpu, uint64_t startrip)
 
 		exitcode = vmexit[vcpu].exitcode;
 		if (exitcode >= VM_EXITCODE_MAX || handler[exitcode] == NULL) {
-			fprintf(stderr, "vcpu_loop: unexpected exitcode 0x%x\n",
+			fprintf(stderr, "vcpu_loop: unexpected exitcode 0x%x\r\n",
 			    exitcode);
 			exit(1);
 		}
@@ -631,7 +631,7 @@ vcpu_loop(int vcpu, uint64_t startrip)
 			exit(1);
 		}
 	}
-	fprintf(stderr, "vm_run error %d, errno %d\n", error, errno);
+	fprintf(stderr, "vm_run error %d, errno %d\r\n", error, errno);
 }
 
 static int
@@ -771,9 +771,9 @@ firmware_parse(const char *opt) {
 	return 0;
 
 fail:
-	fprintf(stderr, "Invalid firmware argument\n"
-		"    -f kexec,'kernel','initrd','\"cmdline\"'\n"
-		"    -f fbsd,'userboot','boot volume','\"kernel env\"'\n");
+	fprintf(stderr, "Invalid firmware argument\r\n"
+		"    -f kexec,'kernel','initrd','\"cmdline\"'\r\n"
+		"    -f fbsd,'userboot','boot volume','\"kernel env\"'\r\n");
 
 	return -1;
 }
@@ -785,7 +785,7 @@ remove_pidfile()
 		return;
 
 	if (unlink(pidfile))
-		fprintf(stderr, "Failed to remove pidfile\n");
+		fprintf(stderr, "Failed to remove pidfile\r\n");
 }
 
 static int
@@ -932,37 +932,37 @@ main(int argc, char *argv[])
 
 	error = xh_vm_create();
 	if (error) {
-		fprintf(stderr, "Unable to create VM (%d)\n", error);
+		fprintf(stderr, "Unable to create VM (%d)\r\n", error);
 		exit(1);
 	}
 
 	if (guest_ncpus < 1) {
-		fprintf(stderr, "Invalid guest vCPUs (%d)\n", guest_ncpus);
+		fprintf(stderr, "Invalid guest vCPUs (%d)\r\n", guest_ncpus);
 		exit(1);
 	}
 
 	max_vcpus = num_vcpus_allowed();
 	if (guest_ncpus > max_vcpus) {
-		fprintf(stderr, "%d vCPUs requested but only %d available\n",
+		fprintf(stderr, "%d vCPUs requested but only %d available\r\n",
 			guest_ncpus, max_vcpus);
 		exit(1);
 	}
 
 	error = xh_vm_setup_memory(memsize, VM_MMAP_ALL);
 	if (error) {
-		fprintf(stderr, "Unable to setup memory (%d)\n", error);
+		fprintf(stderr, "Unable to setup memory (%d)\r\n", error);
 		exit(1);
 	}
 
 	error = init_msr();
 	if (error) {
-		fprintf(stderr, "init_msr error %d\n", error);
+		fprintf(stderr, "init_msr error %d\r\n", error);
 		exit(1);
 	}
 
 	error = setup_pidfile();
 	if (error) {
-		fprintf(stderr, "pidfile error %d\n", error);
+		fprintf(stderr, "pidfile error %d\r\n", error);
 		exit(1);
 	}
 
