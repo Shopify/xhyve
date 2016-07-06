@@ -34,6 +34,7 @@ CFLAGS_OPT := \
 CFLAGS_WARN := \
   -Weverything \
   -Werror \
+	-Wno-deprecated-declarations \
   -Wno-unknown-warning-option \
   -Wno-reserved-id-macro \
   -pedantic
