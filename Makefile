@@ -1,5 +1,7 @@
 GIT_VERSION := $(shell git describe --abbrev=6 --dirty --always --tags)
 
+ENTITLEMENTS := src/xhyve-entitlements.plist
+
 ifeq ($V, 1)
 	VERBOSE =
 else
@@ -110,7 +112,12 @@ $(TARGET).sym: $(OBJ)
 	@echo dsym $(notdir $(TARGET).dSYM)
 	$(VERBOSE) $(ENV) $(DSYM) $@ -o $(TARGET).dSYM
 
-$(TARGET): $(TARGET).sym
+$(TARGET): $(TARGET).unsigned
+	$(VERBOSE) $(ENV) mv $< $@.wip
+	$(VERBOSE) $(ENV) codesign -s - --entitlements $(ENTITLEMENTS) --force $@.wip
+	$(VERBOSE) $(ENV) mv $@.wip $@
+
+$(TARGET).unsigned: $(TARGET).sym
 	@echo strip $(notdir $@)
 	$(VERBOSE) $(ENV) $(STRIP) $(TARGET).sym -o $@
 
